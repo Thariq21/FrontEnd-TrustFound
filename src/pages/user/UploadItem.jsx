@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, Image as ImageIcon, AlertCircle, CheckCircle } from 'lucide-react';
+import { Upload, Image as ImageIcon, AlertCircle, CheckCircle, Info } from 'lucide-react';
 import api from '../../services/api';
 
 const UploadItem = () => {
@@ -15,7 +15,7 @@ const UploadItem = () => {
     name: '',
     category_id: '',
     found_location: '',
-    found_date: '',
+    found_date: new Date().toISOString().split('T')[0], // Default hari ini
     description: '',
     image: null,
   });
@@ -34,6 +34,7 @@ const UploadItem = () => {
       const response = await api.get('/categories');
       setCategories(response.data.data || []);
     } catch (err) {
+      console.error(err);
       setError('Gagal memuat kategori');
     }
   };
@@ -42,7 +43,6 @@ const UploadItem = () => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     setError('');
-    setSuccess('');
   };
 
   const handleImageChange = (e) => {
@@ -54,7 +54,7 @@ const UploadItem = () => {
       }
 
       if (!file.type.startsWith('image/')) {
-        setError('File harus berupa gambar');
+        setError('File harus berupa gambar (JPG/PNG)');
         return;
       }
 
@@ -73,7 +73,7 @@ const UploadItem = () => {
     e.preventDefault();
 
     if (!formData.image) {
-      setError('Foto barang wajib diupload');
+      setError('Foto barang wajib diupload sebagai bukti.');
       return;
     }
 
@@ -101,180 +101,183 @@ const UploadItem = () => {
         },
       });
 
-      setSuccess('Barang berhasil dilaporkan! Redirecting...');
+      setSuccess('Laporan berhasil dikirim! Terima kasih atas kejujuran Anda.');
 
       setTimeout(() => {
         navigate('/');
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal melaporkan barang. Silakan coba lagi.');
+      console.error(err);
+      setError(err.response?.data?.message || 'Gagal melaporkan barang. Cek koneksi atau coba lagi.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-8">
-            <h1 className="text-3xl font-bold text-white flex items-center">
-              <Upload className="mr-3" size={32} />
-              Lapor Barang Temuan
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+          <div className="bg-blue-600 px-8 py-8">
+            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+              <Upload className="w-8 h-8 opacity-80" />
+              Lapor Temuan
             </h1>
-            <p className="text-blue-100 mt-2">Laporkan barang yang Anda temukan di kampus</p>
+            <p className="text-blue-100 mt-2">
+              Bantu teman Anda menemukan barangnya kembali.
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <form onSubmit={handleSubmit} className="p-8 space-y-8">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-start">
-                <AlertCircle size={20} className="mr-2 mt-0.5 flex-shrink-0" />
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                <AlertCircle size={20} />
                 <span>{error}</span>
               </div>
             )}
 
             {success && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-start">
-                <CheckCircle size={20} className="mr-2 mt-0.5 flex-shrink-0" />
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                <CheckCircle size={20} />
                 <span>{success}</span>
               </div>
             )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Foto Barang <span className="text-red-500">*</span>
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition">
-                {imagePreview ? (
-                  <div className="space-y-4">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="max-h-64 mx-auto rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImagePreview(null);
-                        setFormData(prev => ({ ...prev, image: null }));
-                      }}
-                      className="text-sm text-red-600 hover:text-red-700"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Kolom Kiri: Upload Foto */}
+                <div className="space-y-4">
+                    <label className="block text-sm font-bold text-gray-700">
+                        Foto Barang <span className="text-red-500">*</span>
+                    </label>
+                    
+                    <div 
+                        className={`border-2 border-dashed rounded-xl p-4 text-center transition-all h-64 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden group ${
+                            imagePreview ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+                        }`}
                     >
-                      Hapus Foto
-                    </button>
-                  </div>
-                ) : (
-                  <label className="cursor-pointer block">
-                    <ImageIcon size={48} className="mx-auto text-gray-400 mb-2" />
-                    <span className="text-gray-600">Klik untuk upload foto</span>
-                    <p className="text-xs text-gray-500 mt-2">PNG, JPG hingga 5MB</p>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                  </label>
-                )}
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Catatan: Jika barang termasuk kategori sensitif, foto akan otomatis diblur oleh sistem
-              </p>
+                        {imagePreview ? (
+                            <>
+                                <img
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    className="absolute inset-0 w-full h-full object-contain p-2"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <p className="text-white font-medium">Ganti Foto</p>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="pointer-events-none">
+                                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 text-blue-600">
+                                    <ImageIcon size={32} />
+                                </div>
+                                <p className="text-gray-600 font-medium">Klik untuk upload foto</p>
+                                <p className="text-xs text-gray-400 mt-1">Maks. 5MB (JPG/PNG)</p>
+                            </div>
+                        )}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                        />
+                    </div>
+                    
+                    <div className="bg-blue-50 p-3 rounded-lg flex gap-3 items-start border border-blue-100">
+                        <Info size={18} className="text-blue-600 shrink-0 mt-0.5" />
+                        <p className="text-xs text-blue-800">
+                            <strong>Privasi Terjaga:</strong> Jika barang mengandung data pribadi (KTP, Dompet), sistem akan otomatis memburamkan foto di halaman publik.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Kolom Kanan: Form Data */}
+                <div className="space-y-5">
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Nama Barang</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                            placeholder="Contoh: Dompet Kulit Coklat"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Kategori</label>
+                        <select
+                            name="category_id"
+                            value={formData.category_id}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white"
+                            required
+                        >
+                            <option value="">Pilih Kategori</option>
+                            {categories.map(cat => (
+                                <option key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Lokasi Ditemukan</label>
+                        <input
+                            type="text"
+                            name="found_location"
+                            value={formData.found_location}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                            placeholder="Contoh: Kantin Gedung B"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Tanggal</label>
+                        <input
+                            type="date"
+                            name="found_date"
+                            value={formData.found_date}
+                            onChange={handleChange}
+                            max={new Date().toISOString().split('T')[0]}
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                            required
+                        />
+                    </div>
+                </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nama Barang <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Contoh: Dompet Coklat"
-                required
-              />
+            <div className="pt-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Deskripsi Tambahan</label>
+                <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="Ceritakan kondisi barang atau di mana tepatnya Anda menitipkannya (misal: di Pos Satpam Utama)..."
+                />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kategori <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="category_id"
-                value={formData.category_id}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              >
-                <option value="">Pilih Kategori</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Lokasi Ditemukan <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="found_location"
-                value={formData.found_location}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Contoh: Gedung A Lantai 3"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tanggal Ditemukan <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                name="found_date"
-                value={formData.found_date}
-                onChange={handleChange}
-                max={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Deskripsi Detail
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Ceritakan kondisi barang dan informasi tambahan lainnya..."
-              />
-            </div>
-
-            <div className="flex space-x-4 pt-4">
+            <div className="flex gap-4 pt-4 border-t border-gray-100">
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-[2] bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition font-medium shadow-md hover:shadow-lg disabled:opacity-70 flex items-center justify-center"
               >
-                {loading ? 'Memproses...' : 'Laporkan Barang'}
+                {loading ? 'Mengirim Laporan...' : 'Kirim Laporan'}
               </button>
             </div>
           </form>
