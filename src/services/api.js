@@ -1,7 +1,5 @@
 import axios from 'axios';
 
-// Menggunakan environment variable atau fallback ke URL default
-// Pastikan VITE_API_BASE_URL diatur di file .env Anda, misal: VITE_API_BASE_URL=https://api.thrqrhmn.my.id/api
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.thrqrhmn.my.id/api';
 
 const api = axios.create({
@@ -18,6 +16,13 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // CRITICAL FIX: Jika body adalah FormData, hapus Content-Type
+    // Biarkan browser set otomatis dengan boundary yang benar
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+    
     return config;
   },
   (error) => {
@@ -25,20 +30,17 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor untuk menangani response error (misal token expired)
+// Interceptor untuk menangani response error
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Hapus data sesi jika unauthorized
       localStorage.removeItem('token');
       localStorage.removeItem('role');
       localStorage.removeItem('name');
       localStorage.removeItem('nim');
       localStorage.removeItem('nip');
       
-      // Redirect ke login jika bukan sedang di halaman login/register
-      // Menggunakan window.location agar refresh state auth terjadi sepenuhnya
       if (!window.location.pathname.match(/\/auth\/(login|register)/)) {
         window.location.href = '/auth/login';
       }

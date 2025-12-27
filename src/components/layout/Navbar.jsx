@@ -8,11 +8,15 @@ const Navbar = () => {
   const token = localStorage.getItem('token');
   const userRole = localStorage.getItem('role');
 
+  // Helper untuk mengecek apakah user adalah admin atau satpam
+  const isAdmin = userRole === 'admin' || userRole === 'satpam';
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('name');
     localStorage.removeItem('nim');
+    localStorage.removeItem('nip');
     navigate('/auth/login');
   };
 
@@ -21,7 +25,8 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
+            {/* Jika admin, klik logo ke Dashboard. Jika user biasa/guest, ke Home */}
+            <Link to={isAdmin ? "/admin/dashboard" : "/"} className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">TF</span>
               </div>
@@ -30,13 +35,16 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <Link
-              to="/"
-              className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition"
-            >
-              <Home size={18} />
-              <span>Home</span>
-            </Link>
+            {/* Menu Home: Hanya tampil jika BUKAN Admin/Satpam */}
+            {!isAdmin && (
+              <Link
+                to="/"
+                className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition"
+              >
+                <Home size={18} />
+                <span>Home</span>
+              </Link>
+            )}
 
             {token && (
               <>
@@ -48,7 +56,7 @@ const Navbar = () => {
                   <span>Lapor Barang</span>
                 </Link>
 
-                {(userRole === 'admin' || userRole === 'satpam') && (
+                {isAdmin && (
                   <Link
                     to="/admin/dashboard"
                     className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition"
@@ -58,13 +66,16 @@ const Navbar = () => {
                   </Link>
                 )}
 
-                <Link
-                  to="/profile"
-                  className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition"
-                >
-                  <User size={18} />
-                  <span>Profile</span>
-                </Link>
+                {/* Menu Profile: Hanya tampil jika BUKAN Admin/Satpam */}
+                {!isAdmin && (
+                  <Link
+                    to="/profile"
+                    className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition"
+                  >
+                    <User size={18} />
+                    <span>Profile</span>
+                  </Link>
+                )}
 
                 <button
                   onClick={handleLogout}
@@ -100,14 +111,16 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden bg-white border-t">
           <div className="px-2 pt-2 pb-3 space-y-1">
-            <Link
-              to="/"
-              className="flex items-center space-x-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md transition"
-              onClick={() => setIsOpen(false)}
-            >
-              <Home size={18} />
-              <span>Home</span>
-            </Link>
+            {!isAdmin && (
+              <Link
+                to="/"
+                className="flex items-center space-x-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md transition"
+                onClick={() => setIsOpen(false)}
+              >
+                <Home size={18} />
+                <span>Home</span>
+              </Link>
+            )}
 
             {token && (
               <>
@@ -120,7 +133,7 @@ const Navbar = () => {
                   <span>Lapor Barang</span>
                 </Link>
 
-                {(userRole === 'admin' || userRole === 'satpam') && (
+                {isAdmin && (
                   <Link
                     to="/admin/dashboard"
                     className="flex items-center space-x-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md transition"
@@ -131,14 +144,16 @@ const Navbar = () => {
                   </Link>
                 )}
 
-                <Link
-                  to="/profile"
-                  className="flex items-center space-x-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md transition"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <User size={18} />
-                  <span>Profile</span>
-                </Link>
+                {!isAdmin && (
+                  <Link
+                    to="/profile"
+                    className="flex items-center space-x-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md transition"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <User size={18} />
+                    <span>Profile</span>
+                  </Link>
+                )}
 
                 <button
                   onClick={() => {
