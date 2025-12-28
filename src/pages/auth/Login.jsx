@@ -136,7 +136,7 @@ const Login = () => {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30">
-            <img src="../../../../public/Logo-TrustFound.png" alt="" />
+            <img src="/Logo-TrustFound.png" alt="" />
           </div>
           <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">TrustFound</h1>
           <p className="text-gray-600">Sistem Lost & Found Terintegrasi</p>
