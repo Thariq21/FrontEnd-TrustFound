@@ -527,24 +527,27 @@ const Dashboard = () => {
                                   </button>
                                 </>
                               ) : (
-                                <button
-                                  onClick={() => handleToggleBlur(item.item_id, item.is_sensitive)}
-                                  disabled={processingId === item.item_id}
-                                  className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium ${
-                                    item.is_sensitive === 1
-                                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                      : 'bg-orange-600 text-white hover:bg-orange-700'
-                                  }`}
-                                >
-                                  {processingId === item.item_id ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : item.is_sensitive === 1 ? (
-                                    <Eye className="w-4 h-4" />
-                                  ) : (
-                                    <EyeOff className="w-4 h-4" />
-                                  )}
-                                  {item.is_sensitive === 1 ? 'Ubah ke Umum (Unblur)' : 'Ubah ke Sensitif (Blur)'}
-                                </button>
+                                // LOGIC UPDATED: Hanya tampilkan tombol jika status BUKAN claimed
+                                item.status !== 'claimed' && (
+                                  <button
+                                    onClick={() => handleToggleBlur(item.item_id, item.is_sensitive)}
+                                    disabled={processingId === item.item_id}
+                                    className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium ${
+                                      item.is_sensitive === 1
+                                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                        : 'bg-orange-600 text-white hover:bg-orange-700'
+                                    }`}
+                                  >
+                                    {processingId === item.item_id ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : item.is_sensitive === 1 ? (
+                                      <Eye className="w-4 h-4" />
+                                    ) : (
+                                      <EyeOff className="w-4 h-4" />
+                                    )}
+                                    {item.is_sensitive === 1 ? 'Ubah ke Umum (Unblur)' : 'Ubah ke Sensitif (Blur)'}
+                                  </button>
+                                )
                               )}
                             </div>
                           </div>

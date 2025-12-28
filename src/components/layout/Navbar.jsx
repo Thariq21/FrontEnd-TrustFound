@@ -24,11 +24,12 @@ const Navbar = () => {
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
+
           <div className="flex items-center">
             {/* Jika admin, klik logo ke Dashboard. Jika user biasa/guest, ke Home */}
             <Link to={isAdmin ? "/admin/dashboard" : "/"} className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">TF</span>
+              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                <img src="../../../public/Logo-TrustFound.png" alt="" />
               </div>
               <span className="text-xl font-bold text-gray-900">TrustFound</span>
             </Link>

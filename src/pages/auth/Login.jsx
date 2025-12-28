@@ -135,10 +135,10 @@ const Login = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center px-4 font-sans">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <div className="inline-block w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-blue-600/30 transform rotate-3">
-            <span className="text-white font-extrabold text-2xl">TF</span>
+          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+            <img src="../../../../public/Logo-TrustFound.png" alt="" />
           </div>
-          <h1 className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">TrustFound</h1>
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">TrustFound</h1>
           <p className="text-gray-600">Sistem Lost & Found Terintegrasi</p>
         </div>
 
@@ -241,14 +241,14 @@ const Login = () => {
               </button>
             </form>
 
-            <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+            {/* <div className="mt-8 pt-6 border-t border-gray-100 text-center">
               <p className="text-sm text-gray-600">
                 {userType === 'mahasiswa' ? 'Mahasiswa baru?' : 'Staf baru?'} {' '}
                 <Link to="/auth/register" className="text-blue-600 hover:text-blue-700 font-bold hover:underline">
                   Aktivasi Akun
                 </Link>
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
