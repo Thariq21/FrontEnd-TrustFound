@@ -36,16 +36,14 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            {/* Menu Home: Hanya tampil jika BUKAN Admin/Satpam */}
-            {!isAdmin && (
-              <Link
-                to="/"
-                className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition"
-              >
-                <Home size={18} />
-                <span>Home</span>
-              </Link>
-            )}
+            {/* PERUBAHAN: Menu Home sekarang tampil untuk semua role (User & Admin) */}
+            <Link
+              to="/"
+              className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition"
+            >
+              <Home size={18} />
+              <span>Home</span>
+            </Link>
 
             {token && (
               <>
@@ -112,16 +110,15 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden bg-white border-t">
           <div className="px-2 pt-2 pb-3 space-y-1">
-            {!isAdmin && (
-              <Link
-                to="/"
-                className="flex items-center space-x-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md transition"
-                onClick={() => setIsOpen(false)}
-              >
-                <Home size={18} />
-                <span>Home</span>
-              </Link>
-            )}
+            {/* PERUBAHAN: Menu Home Mobile sekarang tampil untuk semua role */}
+            <Link
+              to="/"
+              className="flex items-center space-x-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md transition"
+              onClick={() => setIsOpen(false)}
+            >
+              <Home size={18} />
+              <span>Home</span>
+            </Link>
 
             {token && (
               <>

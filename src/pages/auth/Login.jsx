@@ -56,12 +56,12 @@ const Login = () => {
         payload.email = formData.identifier;
       }
 
-      // console.log(`Mengirim Payload Login ke ${loginEndpoint}:`, payload); 
+      console.log(`Mengirim Payload Login ke ${loginEndpoint}:`, payload); 
 
       // Request ke endpoint yang sesuai
       const response = await api.post(loginEndpoint, payload);
       
-      // console.log("Response Server:", response.data);
+      console.log("Response Server:", response.data);
 
       // Ambil data dari response.data.data sesuai struktur API Anda
       const responseData = response.data.data; 
