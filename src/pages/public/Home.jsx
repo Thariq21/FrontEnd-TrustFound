@@ -126,7 +126,7 @@ const Home = () => {
               >
                 <option value="">Semua Kategori</option>
                 {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  <option key={cat.category_id || cat.id} value={cat.category_id || cat.id}>{cat.name}</option>
                 ))}
               </select>
             </div>

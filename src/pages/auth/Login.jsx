@@ -56,12 +56,12 @@ const Login = () => {
         payload.email = formData.identifier;
       }
 
-      console.log(`Mengirim Payload Login ke ${loginEndpoint}:`, payload); 
+      // console.log(`Mengirim Payload Login ke ${loginEndpoint}:`, payload); 
 
       // Request ke endpoint yang sesuai
       const response = await api.post(loginEndpoint, payload);
       
-      console.log("Response Server:", response.data);
+      // console.log("Response Server:", response.data);
 
       // Ambil data dari response.data.data sesuai struktur API Anda
       const responseData = response.data.data; 
@@ -187,7 +187,7 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  {userType === 'mahasiswa' ? 'NIM / Email' : 'NIP / Email'}
+                  {userType === 'mahasiswa' ? 'NIM' : 'NIP'}
                 </label>
                 <div className="relative group">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors" size={20} />

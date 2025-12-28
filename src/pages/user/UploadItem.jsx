@@ -21,6 +21,7 @@ const UploadItem = () => {
 
   // Cek role user
   const userRole = localStorage.getItem('role');
+  // Pastikan role lowercase untuk konsistensi
   const isAdmin = userRole === 'admin' || userRole === 'satpam';
 
   // Load categories saat component mount
@@ -111,7 +112,7 @@ const UploadItem = () => {
       return;
     }
 
-    // Validasi deskripsi untuk kategori sensitif (Skip validasi ini untuk Admin jika diinginkan, tapi defaultnya tetap ada)
+    // Validasi deskripsi untuk kategori sensitif (Skip validasi ini untuk Admin)
     if (!isAdmin) {
       const sensitiveCategories = ['Dompet / Tas / Identitas Pribadi', 'Elektronik (HP, Laptop, Tab, Earphone)'];
       const selectedCategory = categories.find(cat => cat.category_id === parseInt(formData.category_id));
@@ -143,11 +144,15 @@ const UploadItem = () => {
       
       submitData.append('image', imageFile, imageFile.name);
 
+      // --- LOGIKA UTAMA: Tentukan Endpoint berdasarkan Role ---
+      // Jika Admin/Satpam -> /admin/items (Otomatis Secured)
+      // Jika User Biasa -> /items (Status Pending)
+      const endpoint = isAdmin ? '/admin/items' : '/items';
+
       // Kirim ke backend
-      // Header Content-Type di-set ke undefined agar browser otomatis menambahkan boundary
-      await api.post('/items', submitData, {
+      await api.post(endpoint, submitData, {
         headers: {
-          'Content-Type': undefined 
+          'Content-Type': undefined // Biarkan browser set multipart/form-data boundary
         }
       });
 
@@ -183,17 +188,22 @@ const UploadItem = () => {
       let errorMsg = 'Gagal upload barang.';
       if (err.response?.data?.message) {
         errorMsg = err.response.data.message;
+        // Handle validation errors array dari express-validator
         if (err.response.data.errors) {
           const errorDetails = err.response.data.errors;
-          if (typeof errorDetails === 'object') {
-             const details = Object.values(errorDetails).flat().join(', ');
+          if (Array.isArray(errorDetails)) {
+             const details = errorDetails.map(e => e.msg).join(', ');
              if (details) errorMsg += `: ${details}`;
           }
         }
       } else if (err.response?.status === 400) {
-        errorMsg = 'Data yang dikirim tidak valid (Bad Request). Periksa kembali input Anda.';
+        errorMsg = 'Data yang dikirim tidak valid. Periksa kembali input Anda.';
+      } else if (err.response?.status === 401) {
+        errorMsg = 'Sesi habis. Silakan login kembali.';
+      } else if (err.response?.status === 403) {
+        errorMsg = 'Anda tidak memiliki izin untuk melakukan aksi ini.';
       } else if (err.response?.status === 500) {
-        errorMsg = 'Terjadi kesalahan di server (500). Mohon coba lagi nanti.';
+        errorMsg = 'Terjadi kesalahan di server. Mohon coba lagi nanti.';
       }
       
       setError(errorMsg);
@@ -334,7 +344,7 @@ const UploadItem = () => {
                   {category.name}
                 </option>
               ))}
-              {/* Fallback jika kategori kosong */}
+              {/* Fallback jika kategori kosong (opsional, jika API belum siap) */}
               {categories.length === 0 && (
                 <>
                   <option value="1">Elektronik (HP, Laptop, Tab, Earphone)</option>

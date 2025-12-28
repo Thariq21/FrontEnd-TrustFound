@@ -1,6 +1,6 @@
   import { useState, useEffect } from 'react';
   import { useParams, useNavigate } from 'react-router-dom';
-  import { Package, MapPin, Calendar, Tag, AlertCircle, CheckCircle, ShieldAlert, ArrowLeft, Loader2 } from 'lucide-react';
+  import { Package, MapPin, Calendar, Tag, AlertCircle, CheckCircle, ShieldAlert, ArrowLeft, Loader2, Info } from 'lucide-react';
   import api from '../../services/api.js';
   import { getImageUrl, formatDate } from '../../utils/helpers.js';
 
@@ -84,6 +84,14 @@
 
         // Endpoint /claims menerima JSON. Axios otomatis set Content-Type: application/json
         await api.post('/claims', payload);
+
+        // --- PESAN SUKSES DIPERBARUI DISINI ---
+      setSuccess('Klaim berhasil diajukan! Harap pantau status. Jika disetujui, barang harus diambil selambat-lambatnya 2 hari dari pengajuan, jika tidak akan auto-reject.');
+
+      // Delay lebih lama (4 detik) agar user sempat membaca pesan
+      setTimeout(() => {
+        navigate('/profile');
+      }, 4000);
 
         setSuccess('Klaim berhasil diajukan! Redirecting...');
 

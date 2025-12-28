@@ -9,6 +9,7 @@ import UploadItem from './pages/user/UploadItem';
 import ClaimItem from './pages/user/ClaimItem';
 import Profile from './pages/user/Profile';
 import Dashboard from './pages/admin/Dashboard';
+import NotFound from './pages/public/NotFound'; // Import NotFound
 
 function App() {
   return (
@@ -55,6 +56,9 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Fallback Route untuk 404 */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </Router>
