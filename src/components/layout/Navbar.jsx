@@ -29,7 +29,7 @@ const Navbar = () => {
             {/* Jika admin, klik logo ke Dashboard. Jika user biasa/guest, ke Home */}
             <Link to={isAdmin ? "/admin/dashboard" : "/"} className="flex items-center space-x-2">
               <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                <img src="../../../public/Logo-TrustFound.png" alt="" />
+                <img src="/Logo-TrustFound.png" alt="" />
               </div>
               <span className="text-xl font-bold text-gray-900">TrustFound</span>
             </Link>
