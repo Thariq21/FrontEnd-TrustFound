@@ -40,8 +40,8 @@ npm install
 ### 2. Environment Variables
 
 Backend API sudah dikonfigurasi di `src/services/api.js`:
-- Base URL: `https://api.thrqrhmn.my.id/api`
-- Image URL: `https://api.thrqrhmn.my.id`
+- Base URL: `http://localhost:5000/api`
+- Image URL: `http://localhost:5000`
 
 Token JWT disimpan otomatis di localStorage dengan key `token`.
 
