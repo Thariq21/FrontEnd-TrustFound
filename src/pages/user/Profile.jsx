@@ -1,13 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Clock, CheckCircle, XCircle, Package, AlertCircle, MapPin, Calendar, Tag } from 'lucide-react';
+import { User, Clock, CheckCircle, XCircle, Package, AlertCircle, MapPin, Calendar, Tag, QrCode, X, Loader2 } from 'lucide-react';
 import api from '../../services/api';
+import { QRCodeSVG as QRCode } from 'qrcode.react'; // v3+ qrcode.react sudah tidak punya default export
 
 const Profile = () => {
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  // --- State baru untuk fitur QR Code ---
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [selectedClaim, setSelectedClaim] = useState(null);
+  const [qrToken, setQrToken] = useState('');
+  const [qrLoading, setQrLoading] = useState(false);
+  const [qrError, setQrError] = useState('');
 
   const userName = localStorage.getItem('name');
   const userNim = localStorage.getItem('nim');
@@ -63,6 +71,39 @@ const Profile = () => {
         <span>{config.label}</span>
       </span>
     );
+  };
+
+  // --- Handler baru untuk membuka/menutup modal QR ---
+  const handleOpenQRModal = async (claim) => {
+    setSelectedClaim(claim);
+    setShowQRModal(true);
+    setQrToken('');
+    setQrError('');
+    setQrLoading(true);
+
+    try {
+      const claimId = claim.claim_id || claim.id;
+      const response = await api.get(`/v2/claims/${claimId}/qr-token`);
+      const token = response.data?.data?.qr_token || response.data?.qr_token;
+
+      if (!token) {
+        throw new Error('Token QR tidak ditemukan pada respons server.');
+      }
+
+      setQrToken(token);
+    } catch (err) {
+      console.error('Gagal mengambil QR token:', err);
+      setQrError('Gagal memuat QR Code. Silakan coba lagi.');
+    } finally {
+      setQrLoading(false);
+    }
+  };
+
+  const handleCloseQRModal = () => {
+    setShowQRModal(false);
+    setSelectedClaim(null);
+    setQrToken('');
+    setQrError('');
   };
 
   return (
@@ -138,7 +179,20 @@ const Profile = () => {
                             <span>{claim.category_name || 'Kategori tidak tersedia'}</span>
                         </div>
                       </div>
-                      {getStatusBadge(claim.status)}
+
+                      {/* --- Wrapper baru: badge status + tombol Lihat QR Code --- */}
+                      <div className="flex items-center gap-3">
+                        {getStatusBadge(claim.status)}
+                        {claim.status === 'verified' && (
+                          <button
+                            onClick={() => handleOpenQRModal(claim)}
+                            className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition shadow-sm"
+                          >
+                            <QrCode size={16} />
+                            Lihat QR Code
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded-lg border border-gray-100">
@@ -203,6 +257,72 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* --- Modal QR Code (baru) --- */}
+      {showQRModal && selectedClaim && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={handleCloseQRModal}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-sm w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <QrCode size={20} className="text-blue-600" />
+                QR Code Pengambilan
+              </h3>
+              <button
+                onClick={handleCloseQRModal}
+                className="text-gray-400 hover:text-gray-600 transition"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 flex flex-col items-center">
+              <p className="text-sm text-gray-700 font-medium mb-4 text-center">
+                {selectedClaim.item_name}
+              </p>
+
+              {/* QR Code asli, di-generate dari token backend */}
+              {qrLoading ? (
+                <div className="w-48 h-48 bg-gray-50 border border-gray-200 rounded-xl flex flex-col items-center justify-center gap-2">
+                  <Loader2 className="animate-spin text-blue-600" size={28} />
+                  <span className="text-xs text-gray-400">Memuat QR Code...</span>
+                </div>
+              ) : qrError ? (
+                <div className="w-48 h-48 bg-red-50 border-2 border-dashed border-red-200 rounded-xl flex flex-col items-center justify-center gap-2 p-4 text-center">
+                  <X size={28} className="text-red-400" />
+                  <span className="text-xs text-red-600">{qrError}</span>
+                  <button
+                    onClick={() => handleOpenQRModal(selectedClaim)}
+                    className="text-xs text-blue-600 font-medium hover:underline mt-1"
+                  >
+                    Coba lagi
+                  </button>
+                </div>
+              ) : (
+                <div className="w-48 h-48 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center p-4">
+                  <QRCode
+                    value={qrToken}
+                    size={160}
+                    level="M"
+                    includeMargin={false}
+                  />
+                </div>
+              )}
+
+              {/* Teks instruksi di bawah QR, mirip "Catatan Sistem" */}
+              <p className="mt-4 text-xs text-gray-500 text-center leading-relaxed">
+                Tunjukkan QR Code ini kepada petugas pos satpam saat mengambil barang.
+                Pastikan pengambilan dilakukan sebelum batas waktu 2 hari sejak klaim disetujui.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
