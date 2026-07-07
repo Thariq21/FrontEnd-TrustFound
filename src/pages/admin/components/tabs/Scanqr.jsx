@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { QrCode, Camera, CheckCircle2, XCircle, RotateCcw, Loader2, Package, User } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode'; // Pastikan sudah menjalankan npm install html5-qrcode
-import api from '../../services/api';
+import api from '../../../../services/api';
 
 const SCANNER_ELEMENT_ID = 'qr-reader-box';
 

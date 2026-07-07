@@ -1,6 +1,6 @@
 // src/pages/admin/Dashboard.jsx
 import { useState } from 'react';
-import { Package, FileText, Activity } from 'lucide-react';
+import { Package, FileText, Activity, Camera } from 'lucide-react';
 
 // Hooks
 import { useAdminData } from './hooks/useAdminData';
@@ -12,6 +12,7 @@ import DashboardHeader from './components/DashboardHeader';
 import ItemsTab from './components/tabs/ItemsTab';
 import ClaimsTab from './components/tabs/ClaimsTab';
 import LogsTab from './components/tabs/LogsTab';
+import ScanQR from './components/tabs/Scanqr';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('items');
@@ -67,6 +68,12 @@ export default function Dashboard() {
       label: 'Activity Logs',
       icon: Activity,
       count: logs.length
+    },
+    {
+      id: 'scan',
+      label: 'Scan QR',
+      icon: Camera,
+      // count: logs.length
     }
   ];
 
@@ -161,6 +168,11 @@ export default function Dashboard() {
                 loading={loading.logs}
                 actionFilter={logAction}
                 onFilterChange={setLogFilter}
+              />
+            )}
+
+            {activeTab === 'scan' && (
+              <ScanQR
               />
             )}
           </div>
