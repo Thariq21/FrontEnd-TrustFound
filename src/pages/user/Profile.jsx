@@ -61,6 +61,12 @@ const Profile = () => {
         icon: <XCircle size={16} />,
         label: 'Ditolak',
       },
+      claimed: {
+        bg: 'bg-blue-100',
+        text: 'text-blue-700',
+        icon: <CheckCircle size={16} />,
+        label: 'Selesai Diambil',
+      },
     };
 
     const config = statusConfig[status] || statusConfig.pending;
@@ -183,7 +189,7 @@ const Profile = () => {
                       {/* --- Wrapper baru: badge status + tombol Lihat QR Code --- */}
                       <div className="flex items-center gap-3">
                         {getStatusBadge(claim.status)}
-                        {claim.status === 'verified' && (
+                        {claim.status === 'verified' && claim.item_status !== 'claimed' && (
                           <button
                             onClick={() => handleOpenQRModal(claim)}
                             className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition shadow-sm"
