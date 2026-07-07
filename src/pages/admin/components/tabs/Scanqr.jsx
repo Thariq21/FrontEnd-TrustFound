@@ -61,28 +61,29 @@ const ScanQR = () => {
   const startScanner = async () => {
     setCameraError('');
     setResult(null);
+    setIsCameraOn(true); // Pastikan container visible sebelum start supaya dimensi kalkulasi html5-qrcode benar
 
-    try {
-      const html5QrCode = new Html5Qrcode(SCANNER_ELEMENT_ID);
-      scannerRef.current = html5QrCode;
+    setTimeout(async () => {
+      try {
+        const html5QrCode = new Html5Qrcode(SCANNER_ELEMENT_ID);
+        scannerRef.current = html5QrCode;
 
-      await html5QrCode.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        (decodedText) => {
-          handleScanSuccess(decodedText);
-        },
-        () => {
-          // Callback error per-frame (biasanya "no QR found"), sengaja diabaikan
-        }
-      );
-
-      setIsCameraOn(true);
-    } catch (err) {
-      console.error('Gagal mengaktifkan kamera:', err);
-      setCameraError('Tidak dapat mengakses kamera. Pastikan izin kamera sudah diberikan.');
-      setIsCameraOn(false);
-    }
+        await html5QrCode.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          (decodedText) => {
+            handleScanSuccess(decodedText);
+          },
+          () => {
+            // Callback error per-frame (biasanya "no QR found"), sengaja diabaikan
+          }
+        );
+      } catch (err) {
+        console.error('Gagal mengaktifkan kamera:', err);
+        setCameraError('Tidak dapat mengakses kamera. Pastikan izin kamera sudah diberikan.');
+        setIsCameraOn(false);
+      }
+    }, 100);
   };
 
   const stopScanner = async () => {
