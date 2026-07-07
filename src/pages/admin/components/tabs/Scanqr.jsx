@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { QrCode, Camera, CheckCircle2, XCircle, RotateCcw, Loader2, Package, User } from 'lucide-react';
+import { QrCode, Camera, CheckCircle2, XCircle, RotateCcw, Loader2, Package, User, ImagePlus } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode'; // Pastikan sudah menjalankan npm install html5-qrcode
 import api from '../../../../services/api';
 
@@ -117,6 +117,40 @@ const ScanQR = () => {
     await startScanner();
   };
 
+  // Fitur manual upload/capture dari galeri atau kamera native
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (isProcessingRef.current) return;
+    
+    // Matikan kamera aktif jika ada untuk menghindari bentrok
+    if (isCameraOn) {
+      await stopScanner();
+    }
+
+    setValidating(true);
+    setResult(null);
+    setCameraError('');
+
+    try {
+      let html5QrCode = scannerRef.current;
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode(SCANNER_ELEMENT_ID);
+      }
+      
+      const decodedText = await html5QrCode.scanFile(file, false);
+      handleScanSuccess(decodedText);
+    } catch (err) {
+      console.error('Error scanning file:', err);
+      setCameraError('Gambar tidak mengandung QR Code atau buram. Silakan coba lagi.');
+      setValidating(false);
+    } finally {
+      // Reset input value supaya bisa pilih file yang sama lagi jika perlu
+      event.target.value = '';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -208,18 +242,40 @@ const ScanQR = () => {
                   Scan Lagi
                 </button>
               ) : (
-                <button
-                  onClick={handleToggleCamera}
-                  disabled={validating}
-                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition shadow-md disabled:opacity-60 ${
-                    isCameraOn
-                      ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  <Camera size={18} />
-                  {isCameraOn ? 'Matikan Kamera' : 'Aktifkan Kamera'}
-                </button>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={handleToggleCamera}
+                    disabled={validating}
+                    className={`inline-flex justify-center items-center gap-2 px-6 py-3 rounded-xl font-medium transition shadow-md disabled:opacity-60 ${
+                      isCameraOn
+                        ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
+                  >
+                    <Camera size={18} />
+                    {isCameraOn ? 'Matikan Kamera' : 'Aktifkan Kamera'}
+                  </button>
+
+                  {/* Tombol Upload / Ambil Foto dari galeri atau kamera asli */}
+                  <div className="relative">
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      capture="environment" 
+                      onChange={handleFileUpload}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-default"
+                      disabled={validating}
+                    />
+                    <button 
+                      type="button"
+                      disabled={validating}
+                      className="w-full inline-flex justify-center items-center gap-2 bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition shadow-sm disabled:opacity-60"
+                    >
+                      <ImagePlus size={18} />
+                      Ambil / Upload Foto
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           </div>

@@ -189,7 +189,7 @@ const Profile = () => {
                       {/* --- Wrapper baru: badge status + tombol Lihat QR Code --- */}
                       <div className="flex items-center gap-3">
                         {getStatusBadge(claim.status)}
-                        {claim.status === 'verified' && claim.item_status !== 'claimed' && (
+                        {claim.status === 'verified' && claim.item_status !== 'claimed' && claim.item_status !== 'donated' && (
                           <button
                             onClick={() => handleOpenQRModal(claim)}
                             className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition shadow-sm"
