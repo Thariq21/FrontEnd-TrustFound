@@ -1,15 +1,21 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, User, LogOut, Upload, Home, LayoutDashboard } from 'lucide-react';
 import { useState } from 'react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const token = localStorage.getItem('token');
   const userRole = localStorage.getItem('role');
 
   // Helper untuk mengecek apakah user adalah admin atau satpam
   const isAdmin = userRole === 'admin' || userRole === 'satpam';
+
+  // Sembunyikan Navbar global jika berada di halaman admin (karena digabung di DashboardHeader)
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('token');

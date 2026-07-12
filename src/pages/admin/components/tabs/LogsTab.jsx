@@ -1,8 +1,17 @@
 // src/pages/admin/components/tabs/LogsTab.jsx
-import { Activity, LogIn, Shield, FileText, CheckCircle, XCircle, Eye, Globe, Monitor } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Activity, LogIn, Shield, FileText, CheckCircle, XCircle, Eye, Globe, Monitor, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDateTime } from '../../../../utils/helpers';
 
 export default function LogsTab({ logs, loading, actionFilter, onFilterChange }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Reset page to 1 when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [actionFilter, logs.length]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -68,6 +77,27 @@ export default function LogsTab({ logs, loading, actionFilter, onFilterChange })
     blurActions: logs.filter(log => ['BLUR_ITEM', 'UNBLUR_ITEM', 'SECURE_ITEM'].includes(log.action?.toUpperCase())).length
   };
 
+  // Pagination logic
+  const totalPages = Math.ceil(logs.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentLogs = logs.slice(startIndex, startIndex + itemsPerPage);
+
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (currentPage <= 4) {
+        pages.push(1, 2, 3, 4, 5, '...', totalPages);
+      } else if (currentPage >= totalPages - 3) {
+        pages.push(1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+      }
+    }
+    return pages;
+  };
+
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
@@ -115,8 +145,8 @@ export default function LogsTab({ logs, loading, actionFilter, onFilterChange })
 
       {/* Filter */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
             <label htmlFor="action-filter" className="text-sm font-medium text-gray-700">
               Filter Aksi:
             </label>
@@ -150,99 +180,176 @@ export default function LogsTab({ logs, loading, actionFilter, onFilterChange })
             <p className="text-gray-500">Tidak ada aktivitas untuk filter ini</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-200">
-            {logs.map((log, index) => (
-              <div key={log._id || index} className="p-6 hover:bg-gray-50 transition-colors">
-                <div className="flex items-start space-x-4">
-                  {/* Icon */}
-                  <div className="flex-shrink-0 mt-1">
-                    <div className="p-3 bg-gray-100 rounded-full">
-                      {getActionIcon(log.action)}
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getActionBadge(log.action)}`}>
-                            {log.action || 'UNKNOWN'}
-                          </span>
-                          <span className="text-sm text-gray-600">
-                            by <strong className="text-gray-900">{log.actor?.name || 'System'}</strong>
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500">
-                          Role: {log.actor?.role || 'N/A'} • ID: {log.actor?.id || 'N/A'}
-                        </p>
-                      </div>
-                      
-                      <div className="text-right">
-                        <p className="text-sm text-gray-900 font-medium">
-                          {formatDateTime(log.timestamp)}
-                        </p>
+          <>
+            <div className="divide-y divide-gray-200">
+              {currentLogs.map((log, index) => (
+                <div key={log._id || index} className="p-6 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-start space-x-4">
+                    {/* Icon */}
+                    <div className="flex-shrink-0 mt-1">
+                      <div className="p-3 bg-gray-100 rounded-full">
+                        {getActionIcon(log.action)}
                       </div>
                     </div>
 
-                    {/* Info Grid */}
-                    <div className="grid grid-cols-2 gap-4 mb-3">
-                      {/* Target Info */}
-                      <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                          Target Info
-                        </p>
-                        <div className="space-y-1">
-                          <div className="flex items-start">
-                            <span className="text-xs text-gray-600 w-16">Entity:</span>
-                            <span className="text-xs font-medium text-gray-900">{log.target?.entity || '-'}</span>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      {/* Header */}
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-3 gap-2 sm:gap-0">
+                        <div>
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getActionBadge(log.action)}`}>
+                              {log.action || 'UNKNOWN'}
+                            </span>
+                            <span className="text-sm text-gray-600">
+                              by <strong className="text-gray-900">{log.actor?.name || 'System'}</strong>
+                            </span>
                           </div>
-                          <div className="flex items-start">
-                            <span className="text-xs text-gray-600 w-16">ID:</span>
-                            <span className="text-xs font-medium text-gray-900">{log.target?.entityId || '-'}</span>
-                          </div>
-                          <div className="flex items-start">
-                            <span className="text-xs text-gray-600 w-16">Details:</span>
-                            <span className="text-xs text-gray-700 italic">"{log.target?.details || '-'}"</span>
-                          </div>
+                          <p className="text-xs text-gray-500">
+                            Role: {log.actor?.role || 'N/A'} • ID: {log.actor?.id || 'N/A'}
+                          </p>
+                        </div>
+                        
+                        <div className="text-left sm:text-right mt-2 sm:mt-0">
+                          <p className="text-sm text-gray-900 font-medium">
+                            {formatDateTime(log.timestamp)}
+                          </p>
                         </div>
                       </div>
 
-                      {/* Metadata */}
-                      <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                        <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-2">
-                          Metadata
-                        </p>
-                        <div className="space-y-1">
-                          <div className="flex items-center">
-                            <Globe className="h-3 w-3 text-blue-600 mr-2" />
-                            <span className="text-xs text-gray-700">
-                              {log.metadata?.ip_address || '-'}
-                            </span>
+                      {/* Info Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
+                        {/* Target Info */}
+                        <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                            Target Info
+                          </p>
+                          <div className="space-y-1">
+                            <div className="flex items-start">
+                              <span className="text-xs text-gray-600 w-16">Entity:</span>
+                              <span className="text-xs font-medium text-gray-900">{log.target?.entity || '-'}</span>
+                            </div>
+                            <div className="flex items-start">
+                              <span className="text-xs text-gray-600 w-16">ID:</span>
+                              <span className="text-xs font-medium text-gray-900">{log.target?.entityId || '-'}</span>
+                            </div>
+                            <div className="flex items-start">
+                              <span className="text-xs text-gray-600 w-16">Details:</span>
+                              <span className="text-xs text-gray-700 italic">"{log.target?.details || '-'}"</span>
+                            </div>
                           </div>
-                          <div className="flex items-start">
-                            <Monitor className="h-3 w-3 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
-                            <span className="text-xs text-gray-700 line-clamp-2">
-                              {log.metadata?.user_agent || '-'}
-                            </span>
-                          </div>
-                          {log.metadata?.is_sensitive_change !== undefined && (
+                        </div>
+
+                        {/* Metadata */}
+                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                          <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-2">
+                            Metadata
+                          </p>
+                          <div className="space-y-1">
                             <div className="flex items-center">
-                              <Eye className="h-3 w-3 text-blue-600 mr-2" />
+                              <Globe className="h-3 w-3 text-blue-600 mr-2" />
                               <span className="text-xs text-gray-700">
-                                Sensitive: {log.metadata.is_sensitive_change ? 'Yes' : 'No'}
+                                {log.metadata?.ip_address || '-'}
                               </span>
                             </div>
-                          )}
+                            <div className="flex items-start">
+                              <Monitor className="h-3 w-3 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
+                              <span className="text-xs text-gray-700 line-clamp-2">
+                                {log.metadata?.user_agent || '-'}
+                              </span>
+                            </div>
+                            {log.metadata?.is_sensitive_change !== undefined && (
+                              <div className="flex items-center">
+                                <Eye className="h-3 w-3 text-blue-600 mr-2" />
+                                <span className="text-xs text-gray-700">
+                                  Sensitive: {log.metadata.is_sensitive_change ? 'Yes' : 'No'}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50 rounded-b-lg">
+                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm text-gray-700">
+                      Menampilkan <span className="font-medium">{startIndex + 1}</span> sampai <span className="font-medium">{Math.min(startIndex + itemsPerPage, logs.length)}</span> dari <span className="font-medium">{logs.length}</span> aktivitas
+                    </p>
+                  </div>
+                  <div>
+                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                      <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <span className="sr-only">Previous</span>
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      
+                      {getPageNumbers().map((pageNum, idx) => (
+                        pageNum === '...' ? (
+                          <span key={`ellipsis-${idx}`} className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                            ...
+                          </span>
+                        ) : (
+                          <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-colors
+                              ${currentPage === pageNum 
+                                ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' 
+                                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                              }`}
+                          >
+                            {pageNum}
+                          </button>
+                        )
+                      ))}
+                      
+                      <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <span className="sr-only">Next</span>
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+                
+                {/* Mobile Pagination */}
+                <div className="flex items-center justify-between w-full sm:hidden">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-gray-700 font-medium">
+                    Hal {currentPage} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
     </div>

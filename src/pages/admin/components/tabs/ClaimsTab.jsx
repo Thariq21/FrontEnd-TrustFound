@@ -1,8 +1,16 @@
 // src/pages/admin/components/tabs/ClaimsTab.jsx
-import { Check, X, Clock, User, Calendar, MessageSquare } from 'lucide-react';
+import { Check, X, Clock, User, Calendar, MessageSquare, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getImageUrl, formatDate, formatDateTime } from '../../../../utils/helpers';
+import { useState, useEffect } from 'react';
 
 export default function ClaimsTab({ claims, loading, onApprove, onReject, onRefresh, statusFilter, onFilterChange }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [claims.length, statusFilter]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -33,6 +41,27 @@ export default function ClaimsTab({ claims, loading, onApprove, onReject, onRefr
         {labels[status] || status}
       </span>
     );
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(claims.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentClaims = claims.slice(startIndex, startIndex + itemsPerPage);
+
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (currentPage <= 4) {
+        pages.push(1, 2, 3, 4, 5, '...', totalPages);
+      } else if (currentPage >= totalPages - 3) {
+        pages.push(1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+      }
+    }
+    return pages;
   };
 
   return (
@@ -77,134 +106,213 @@ export default function ClaimsTab({ claims, loading, onApprove, onReject, onRefr
         </div>
       )}
 
-      {/* Claims Cards */}
-      {claims.map((claim) => (
-        <div
-          key={claim.claim_id}
-          className={`
-            bg-white rounded-lg shadow-sm border-2 p-6 transition-all hover:shadow-md
-            ${claim.status === 'pending' && 'border-yellow-200 bg-yellow-50'}
-            ${claim.status === 'verified' && 'border-blue-200'}
-            ${claim.status === 'rejected' && 'border-red-200 bg-red-50'}
-          `}
-        >
-          <div className="flex items-start space-x-6">
-            {/* Image */}
-            <div className="flex-shrink-0">
-              <img
-                src={getImageUrl(claim.image_path, true)}
-                alt={claim.item_name}
-                className="h-44 w-44 object-cover rounded-lg shadow-sm"
-                onError={(e) => {
-                  e.target.src = 'https://placehold.co/400x400?text=No+Image';
-                }}
-              />
-            </div>
+      {claims.length > 0 && (
+        <>
+          {/* Claims Cards */}
+          {currentClaims.map((claim) => (
+            <div
+              key={claim.claim_id}
+              className={`
+                bg-white rounded-lg shadow-sm border-2 p-6 transition-all hover:shadow-md
+                ${claim.status === 'pending' && 'border-yellow-200 bg-yellow-50'}
+                ${claim.status === 'verified' && 'border-blue-200'}
+                ${claim.status === 'rejected' && 'border-red-200 bg-red-50'}
+              `}
+            >
+              <div className="flex flex-col md:flex-row md:items-start gap-6">
+                {/* Image */}
+                <div className="flex-shrink-0 mx-auto md:mx-0">
+                  <img
+                    src={getImageUrl(claim.image_path, true)}
+                    alt={claim.item_name}
+                    className="h-44 w-44 object-cover rounded-lg shadow-sm"
+                    onError={(e) => {
+                      e.target.src = 'https://placehold.co/400x400?text=No+Image';
+                    }}
+                  />
+                </div>
 
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              {/* Header */}
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">
-                    {claim.item_name}
-                  </h3>
-                  <div className="flex items-center text-sm text-gray-600 space-x-3">
-                    <span className="flex items-center">
-                      <User className="h-4 w-4 mr-1" />
-                      Klaim oleh: <strong className="ml-1">{claim.claimer_name}</strong>
-                    </span>
-                    <span className="text-gray-400">•</span>
-                    <span>NIM: {claim.claimer_nim}</span>
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  {/* Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-3 gap-3 sm:gap-0">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-1">
+                        {claim.item_name}
+                      </h3>
+                      <div className="flex items-center text-sm text-gray-600 space-x-3">
+                        <span className="flex items-center">
+                          <User className="h-4 w-4 mr-1" />
+                          Klaim oleh: <strong className="ml-1">{claim.claimer_name}</strong>
+                        </span>
+                        <span className="text-gray-400">•</span>
+                        <span>NIM: {claim.claimer_nim}</span>
+                      </div>
+                    </div>
+                    
+                    <StatusBadge status={claim.status} />
                   </div>
-                </div>
-                
-                <StatusBadge status={claim.status} />
-              </div>
 
-              {/* Challenge Answer */}
-              <div className="mb-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  <MessageSquare className="h-3 w-3 mr-1" />
-                  JAWABAN CHALLENGE
-                </div>
-                <p className="text-sm text-gray-800 leading-relaxed">
-                  {claim.challange_answer}
-                </p>
-              </div>
+                  {/* Challenge Answer */}
+                  <div className="mb-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                      <MessageSquare className="h-3 w-3 mr-1" />
+                      JAWABAN CHALLENGE
+                    </div>
+                    <p className="text-sm text-gray-800 leading-relaxed">
+                      {claim.challange_answer}
+                    </p>
+                  </div>
 
-              {/* Metadata */}
-              <div className="flex items-center text-sm text-gray-600 space-x-4 mb-4">
-                <div className="flex items-center">
-                  <Clock className="h-4 w-4 mr-1" />
-                  <span>Diklaim pada: <strong>{formatDate(claim.create_at)}</strong></span>
+                  {/* Metadata */}
+                  <div className="flex items-center text-sm text-gray-600 space-x-4 mb-4">
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-1" />
+                      <span>Diklaim pada: <strong>{formatDate(claim.create_at)}</strong></span>
+                    </div>
+                  </div>
+
+                  {/* Additional Info for Verified/Rejected */}
+                  {claim.status === 'verified' && claim.processed_at && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-4">
+                      <p className="text-sm text-blue-700 flex items-center">
+                        <Check className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span>
+                          Diverifikasi oleh <strong>NIP {claim.validator_nip}</strong> pada {formatDateTime(claim.processed_at)}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+
+                  {claim.status === 'rejected' && claim.processed_at && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4">
+                      <p className="text-sm text-red-700 flex items-center">
+                        <X className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span>
+                          Ditolak oleh <strong>NIP {claim.validator_nip}</strong> pada {formatDateTime(claim.processed_at)}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex-shrink-0 w-full md:w-48 mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-gray-100">
+                  {claim.status === 'pending' && (
+                    <div className="flex flex-col space-y-3">
+                      {/* Approve Button */}
+                      <button
+                        onClick={async () => {
+                          const success = await onApprove(claim.claim_id);
+                          if (success) onRefresh();
+                        }}
+                        className="w-full inline-flex items-center justify-center px-4 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors shadow-sm"
+                      >
+                        <Check className="h-5 w-5 mr-2" />
+                        Setujui
+                      </button>
+
+                      {/* Reject Button */}
+                      <button
+                        onClick={async () => {
+                          const success = await onReject(claim.claim_id);
+                          if (success) onRefresh();
+                        }}
+                        className="w-full inline-flex items-center justify-center px-4 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors shadow-sm"
+                      >
+                        <X className="h-5 w-5 mr-2" />
+                        Tolak
+                      </button>
+                    </div>
+                  )}
+
+                  {/* No action for verified/rejected */}
+                  {claim.status !== 'pending' && (
+                    <div className="text-center text-sm text-gray-500 italic">
+                      Klaim sudah diproses
+                    </div>
+                  )}
                 </div>
               </div>
+            </div>
+          ))}
 
-              {/* Additional Info for Verified/Rejected */}
-              {claim.status === 'verified' && claim.processed_at && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-4">
-                  <p className="text-sm text-blue-700 flex items-center">
-                    <Check className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span>
-                      Diverifikasi oleh <strong>NIP {claim.validator_nip}</strong> pada {formatDateTime(claim.processed_at)}
-                    </span>
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="px-6 py-4 border border-gray-200 flex items-center justify-between bg-white rounded-lg shadow-sm mt-4">
+              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-gray-700">
+                    Menampilkan <span className="font-medium">{startIndex + 1}</span> sampai <span className="font-medium">{Math.min(startIndex + itemsPerPage, claims.length)}</span> dari <span className="font-medium">{claims.length}</span> klaim
                   </p>
                 </div>
-              )}
-
-              {claim.status === 'rejected' && claim.processed_at && (
-                <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4">
-                  <p className="text-sm text-red-700 flex items-center">
-                    <X className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span>
-                      Ditolak oleh <strong>NIP {claim.validator_nip}</strong> pada {formatDateTime(claim.processed_at)}
-                    </span>
-                  </p>
+                <div>
+                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    <button
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <span className="sr-only">Previous</span>
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    
+                    {getPageNumbers().map((pageNum, idx) => (
+                      pageNum === '...' ? (
+                        <span key={`ellipsis-${idx}`} className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                          ...
+                        </span>
+                      ) : (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-colors
+                            ${currentPage === pageNum 
+                              ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' 
+                              : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                            }`}
+                        >
+                          {pageNum}
+                        </button>
+                      )
+                    ))}
+                    
+                    <button
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <span className="sr-only">Next</span>
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                  </nav>
                 </div>
-              )}
+              </div>
+              
+              {/* Mobile Pagination */}
+              <div className="flex items-center justify-between w-full sm:hidden">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-sm text-gray-700 font-medium">
+                  Hal {currentPage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
+              </div>
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex-shrink-0 w-48">
-              {claim.status === 'pending' && (
-                <div className="flex flex-col space-y-3">
-                  {/* Approve Button */}
-                  <button
-                    onClick={async () => {
-                      const success = await onApprove(claim.claim_id);
-                      if (success) onRefresh();
-                    }}
-                    className="w-full inline-flex items-center justify-center px-4 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors shadow-sm"
-                  >
-                    <Check className="h-5 w-5 mr-2" />
-                    Setujui
-                  </button>
-
-                  {/* Reject Button */}
-                  <button
-                    onClick={async () => {
-                      const success = await onReject(claim.claim_id);
-                      if (success) onRefresh();
-                    }}
-                    className="w-full inline-flex items-center justify-center px-4 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors shadow-sm"
-                  >
-                    <X className="h-5 w-5 mr-2" />
-                    Tolak
-                  </button>
-                </div>
-              )}
-
-              {/* No action for verified/rejected */}
-              {claim.status !== 'pending' && (
-                <div className="text-center text-sm text-gray-500 italic">
-                  Klaim sudah diproses
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      ))}
+          )}
+        </>
+      )}
     </div>
   );
 }
