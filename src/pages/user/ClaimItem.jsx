@@ -39,7 +39,7 @@
         }
 
         setItem(itemData);
-        console.log("Detail Barang Loaded:", itemData);
+        // console.log("Detail Barang Loaded:", itemData);
       } catch (err) {
         console.error("Fetch Error:", err);
         setError('Gagal memuat detail barang. Pastikan barang masih tersedia.');
@@ -80,7 +80,7 @@
           challange_answer: challengeAnswer.trim() || '-',
         };
 
-        console.log("Submitting Claim Payload:", payload);
+        // console.log("Submitting Claim Payload:", payload);
 
         // Endpoint /claims menerima JSON. Axios otomatis set Content-Type: application/json
         await api.post('/claims', payload);

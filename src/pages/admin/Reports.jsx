@@ -29,15 +29,15 @@ export default function Reports() {
     try {
       setLoading(true);
       
-      console.log('🔍 Fetching report from:', '/admin/reports/monthly');
+      // console.log('🔍 Fetching report from:', '/admin/reports/monthly');
       
       const response = await api.get('/admin/reports/monthly', {
         responseType: 'blob', // Important for file download
         timeout: 30000 // 30 seconds timeout
       });
 
-      console.log('✅ Response received:', response);
-      console.log('📦 Response type:', response.headers['content-type']);
+      // console.log('✅ Response received:', response);
+      // console.log('📦 Response type:', response.headers['content-type']);
 
       // Check if response is actually a PDF
       const contentType = response.headers['content-type'];
@@ -121,10 +121,10 @@ export default function Reports() {
     try {
       setLoading(true);
       
-      console.log('🔍 Fetching custom report:', {
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate
-      });
+      // console.log('🔍 Fetching custom report:', {
+      //   startDate: dateRange.startDate,
+      //   endDate: dateRange.endDate
+      // });
       
       const response = await api.get('/admin/reports/monthly', {
         params: {
@@ -135,7 +135,7 @@ export default function Reports() {
         timeout: 30000
       });
 
-      console.log('✅ Response received');
+      // console.log('✅ Response received');
 
       // Check if response is actually a PDF
       const contentType = response.headers['content-type'];

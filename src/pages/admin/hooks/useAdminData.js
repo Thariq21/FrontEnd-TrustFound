@@ -39,13 +39,13 @@ export const useAdminData = () => {
       // Build query params - ALWAYS send status parameter
       const params = `?status=${status || 'all'}`;
       
-      console.log('🔍 Fetching claims with params:', params);
+      // console.log('🔍 Fetching claims with params:', params);
       
       const response = await api.get(`/admin/claims${params}`);
       const claimsData = response.data.data || response.data;
       
-      console.log('✅ Claims received:', claimsData.length, 'items');
-      console.log('📋 Claims data:', claimsData);
+      // console.log('✅ Claims received:', claimsData.length, 'items');
+      // console.log('📋 Claims data:', claimsData);
       
       setClaims(claimsData);
     } catch (err) {
@@ -65,12 +65,12 @@ export const useAdminData = () => {
       // Build query params - send action filter if not 'all'
       const params = action && action !== 'all' ? `?action=${action}` : '';
       
-      console.log('🔍 Fetching logs with params:', params);
+      // console.log('🔍 Fetching logs with params:', params);
       
       const response = await api.get(`/admin/logs${params}`);
       const logsData = response.data.data || response.data;
       
-      console.log('✅ Logs received:', logsData.length, 'items');
+      // console.log('✅ Logs received:', logsData.length, 'items');
       
       setLogs(logsData);
     } catch (err) {

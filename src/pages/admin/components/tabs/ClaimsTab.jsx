@@ -76,7 +76,7 @@ export default function ClaimsTab({ claims, loading, onApprove, onReject, onRefr
             id="status-filter"
             value={statusFilter || 'all'}
             onChange={(e) => {
-              console.log('🔄 Filter changed to:', e.target.value);
+              // console.log('🔄 Filter changed to:', e.target.value);
               onFilterChange && onFilterChange(e.target.value);
             }}
             className="block w-56 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
