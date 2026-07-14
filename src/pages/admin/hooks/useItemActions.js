@@ -5,13 +5,26 @@ import api from '../../../services/api';
 export const useItemActions = () => {
   const [processing, setProcessing] = useState(false);
 
+  const isSensitiveCategory = (categoryId) => {
+    // Kategori 1 dan 2 direkomendasikan Blur (Sensitif)
+    return categoryId === 1 || categoryId === 2;
+  };
+
   // Secure & Blur (untuk pending items) -> set secured + is_sensitive=true
-  const handleSecure = async (itemId) => {
-    if (!window.confirm('Yakin ingin secure & blur item ini?')) return false;
+  const handleSecure = async (item) => {
+    if (!isSensitiveCategory(item.category_id)) {
+      // Tidak sensitif tapi mau di blur
+      const confirm1 = window.confirm(`Peringatan: Kategori "${item.category_name}" direkomendasikan untuk UNBLUR (Tidak Sensitif).\n\nLangkah 1: Lanjutkan untuk BLUR?`);
+      if (!confirm1) return false;
+      const confirm2 = window.confirm(`Langkah 2: Apakah Anda benar-benar yakin ingin menyensor (BLUR) barang ini?`);
+      if (!confirm2) return false;
+    } else {
+      if (!window.confirm('Yakin ingin mengamankan (Secure) & menyensor (Blur) item ini?')) return false;
+    }
     
     try {
       setProcessing(true);
-      await api.put(`/admin/items/${itemId}/secure`, {
+      await api.put(`/admin/items/${item.item_id}/secure`, {
         is_sensitive: true
       });
       alert('Item berhasil di-secure & blur');
@@ -26,12 +39,19 @@ export const useItemActions = () => {
   };
 
   // Blur item (set is_sensitive = true)
-  const handleBlur = async (itemId) => {
-    if (!window.confirm('Yakin ingin ubah ke sensitif (blur)?')) return false;
+  const handleBlur = async (item) => {
+    if (!isSensitiveCategory(item.category_id)) {
+      const confirm1 = window.confirm(`Peringatan: Kategori "${item.category_name}" direkomendasikan untuk UNBLUR (Tidak Sensitif).\n\nLangkah 1: Lanjutkan untuk BLUR?`);
+      if (!confirm1) return false;
+      const confirm2 = window.confirm(`Langkah 2: Apakah Anda benar-benar yakin ingin menyensor (BLUR) barang ini?`);
+      if (!confirm2) return false;
+    } else {
+      if (!window.confirm('Yakin ingin ubah ke sensitif (blur)?')) return false;
+    }
     
     try {
       setProcessing(true);
-      await api.put(`/admin/items/${itemId}/secure`, {
+      await api.put(`/admin/items/${item.item_id}/secure`, {
         is_sensitive: true
       });
       alert('Item berhasil diubah ke sensitif (blur)');
@@ -46,12 +66,20 @@ export const useItemActions = () => {
   };
 
   // Unblur item (set is_sensitive = false)
-  const handleUnblur = async (itemId) => {
-    if (!window.confirm('Yakin ingin ubah ke umum (unblur)?')) return false;
+  const handleUnblur = async (item) => {
+    if (isSensitiveCategory(item.category_id)) {
+      // Sensitif tapi mau di unblur
+      const confirm1 = window.confirm(`Peringatan: Kategori "${item.category_name}" bersifat SENSITIF dan direkomendasikan untuk BLUR.\n\nLangkah 1: Lanjutkan untuk UNBLUR (Dilihat Publik)?`);
+      if (!confirm1) return false;
+      const confirm2 = window.confirm(`Langkah 2: Apakah Anda yakin barang ini aman untuk ditampilkan secara JELAS ke publik?`);
+      if (!confirm2) return false;
+    } else {
+      if (!window.confirm('Yakin ingin ubah ke umum (unblur)?')) return false;
+    }
     
     try {
       setProcessing(true);
-      await api.put(`/admin/items/${itemId}/secure`, {
+      await api.put(`/admin/items/${item.item_id}/secure`, {
         is_sensitive: false
       });
       alert('Item berhasil diubah ke umum (unblur)');

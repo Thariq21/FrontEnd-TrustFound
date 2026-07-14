@@ -44,7 +44,7 @@ export default function ItemsTab({ items, loading, onBlur, onUnblur, onSecure, o
         <div className="flex flex-col space-y-2">
           <button
             onClick={async () => {
-              const success = await onSecure(item.item_id);
+              const success = await onSecure(item);
               if (success) onRefresh();
             }}
             className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors"
@@ -55,7 +55,7 @@ export default function ItemsTab({ items, loading, onBlur, onUnblur, onSecure, o
           
           <button
             onClick={async () => {
-              const success = await onUnblur(item.item_id);
+              const success = await onUnblur(item);
               if (success) onRefresh();
             }}
             className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
@@ -74,7 +74,7 @@ export default function ItemsTab({ items, loading, onBlur, onUnblur, onSecure, o
         return (
           <button
             onClick={async () => {
-              const success = await onUnblur(item.item_id);
+              const success = await onUnblur(item);
               if (success) onRefresh();
             }}
             className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
@@ -89,7 +89,7 @@ export default function ItemsTab({ items, loading, onBlur, onUnblur, onSecure, o
       return (
         <button
           onClick={async () => {
-            const success = await onBlur(item.item_id);
+            const success = await onBlur(item);
             if (success) onRefresh();
           }}
           className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors"
